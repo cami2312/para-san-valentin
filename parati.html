@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noche Mágica 🌙</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background: radial-gradient(circle at top,#1a1a3c 0%,#0f0c29 60%,#000 100%);
+}
+
+/* Canvas */
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+}
+
+/* Texto */
+.texto{
+    position:absolute;
+    top:5vh;
+    width:100%;
+    text-align:center;
+    color:white;
+    z-index:2;
+}
+
+.texto h1{
+    font-size:clamp(28px,5vw,45px);
+}
+
+.texto p{
+    margin-top:10px;
+    opacity:0.9;
+}
+
+/* BOTÓN */
+.boton{
+    position:absolute;
+    bottom:6vh;
+    left:50%;
+    transform:translateX(-50%);
+    padding:14px 30px;
+    border:none;
+    border-radius:40px;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    z-index:3;
+    transition:0.3s;
+}
+
+.boton:hover{
+    transform:translateX(-50%) scale(1.1);
+}
+
+/* MENSAJE CENTRADO */
+.mensaje{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0.7);
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    padding:30px 40px;
+    border-radius:25px;
+    color:white;
+    opacity:0;
+    transition:0.4s;
+    z-index:4;
+    text-align:center;
+    max-width:85%;
+    line-height:1.7;
+    font-size:clamp(16px,2vw,22px);
+}
+
+.mensaje.activo{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+}
+
+/* Fondo oscuro cuando mensaje aparece */
+.overlay{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    opacity:0;
+    transition:0.4s;
+    z-index:3;
+}
+
+.overlay.activo{
+    opacity:1;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="texto">
+    <h1>Bajo la Luna 🌙</h1>
+    <p>Los girasoles también brillan de noche ✨</p>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<div id="mensaje" class="mensaje">
+🌙  
+Si alguna vez dudas de lo especial que eres,  
+recuerda que incluso la luna necesita oscuridad  
+para poder brillar.  
+
+🌻  
+Tú también iluminas más de lo que imaginas. ✨💛
+</div>
+
+<button id="boton" class="boton" onclick="mostrarMensaje()">Toca Aquí 💌</button>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+function resizeCanvas(){
+    const dpr=window.devicePixelRatio||1;
+    canvas.width=window.innerWidth*dpr;
+    canvas.height=window.innerHeight*dpr;
+    canvas.style.width=window.innerWidth+"px";
+    canvas.style.height=window.innerHeight+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeCanvas();
+window.addEventListener("resize",resizeCanvas);
+
+/* Estrellas */
+let estrellas=[];
+for(let i=0;i<100;i++){
+    estrellas.push({
+        x:Math.random()*window.innerWidth,
+        y:Math.random()*window.innerHeight,
+        size:Math.random()*2,
+        alpha:Math.random()
+    });
+}
+
+function dibujarFlor(x,y,escala){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.scale(escala,escala);
+
+    for(let i=0;i<16;i++){
+        ctx.rotate(Math.PI/8);
+        ctx.beginPath();
+        ctx.fillStyle="orange";
+        ctx.ellipse(0,50,18,50,0,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.fillStyle="#5d2c04";
+    ctx.arc(0,0,35,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+let t=0;
+
+function animar(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const w=canvas.width/(window.devicePixelRatio||1);
+    const h=canvas.height/(window.devicePixelRatio||1);
+
+    estrellas.forEach(e=>{
+        ctx.beginPath();
+        ctx.fillStyle="rgba(255,255,255,"+e.alpha+")";
+        ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
+        ctx.fill();
+        e.alpha+=0.01*(Math.random()-0.5);
+    });
+
+    t+=0.01;
+    dibujarFlor(w*0.5,h*0.65,0.8+Math.sin(t)*0.05);
+    dibujarFlor(w*0.85,h*0.3,0.4);
+    dibujarFlor(w*0.15,h*0.4,0.4);
+
+    requestAnimationFrame(animar);
+}
+animar();
+
+function mostrarMensaje(){
+    const mensaje=document.getElementById("mensaje");
+    const overlay=document.getElementById("overlay");
+    const boton=document.getElementById("boton");
+
+    mensaje.classList.toggle("activo");
+    overlay.classList.toggle("activo");
+
+    if(mensaje.classList.contains("activo")){
+        boton.innerText="Cerrar 💛";
+    }else{
+        boton.innerText="Toca Aquí 💌";
+    }
+}
+
+document.getElementById("overlay").onclick=mostrarMensaje;
+</script>
+
+</body>
+</html>
